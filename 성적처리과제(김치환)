@@ -1,0 +1,192 @@
+# 파일 오픈
+f = open('students.txt', 'r')
+
+# 파일 데이터 정리(stu_info) → Key(학번) : Value(정보)
+stu_info = {}
+
+for line in f :
+    id, name, midterm, final = line.strip().split('\t')
+    average, grade = score_preprocessing(midterm, final)
+
+    stu_info[id] = [name, midterm, final, average, grade]
+
+
+# 성적 전처리 함수 → 평균, 등급 산정
+def score_preprocessing(midterm, final) :
+    average = (float(midterm)+ float(final))*0.5
+
+    if average >= 90 :
+        grade = 'A'
+    elif average >= 80 :
+        grade = 'B'
+    elif average >= 70 :
+        grade = 'C'
+    elif average >= 60 :
+        grade = 'D'
+    else :
+        grade = 'F'
+
+    return average, grade
+
+# 출력에 필요한 함수 정의
+def head() :
+  print('Student','\t','Name','\t','Midterm','\t','Final','\t','Average','\t','Grade','\n','-'*100)
+
+def content(id, stu_info) :
+  print(f'{id}\t{stu_info[id][0]}\t{stu_info[id][1]}\t{stu_info[id][2]}\t{stu_info[id][3]}\t{stu_info[id][4]}\n')
+
+  
+
+# 7개의 프로그램 명령어(show, search, changescore, searchgrade, add, remove, quit)
+
+def show(stu_info) :
+  # 전체 목록을 평균점수기준 내림차순으로 출력한다. 평균점수는 소수점 이하 첫번째 자리까지
+  head()
+  stu_info_average = sorted(stu_info.items(), key = lambda x : x[1][3], reverse = True)
+  for i in stu_info_average :
+    content(i[0], stu_info)
+
+
+
+def search(stu_info) :
+  id = input('Student ID: ')
+  if id not in stu_info.keys() :
+    print('NO SUCH PERSON.')
+
+  else :
+    # 학번에 해당하는 정보 출력 
+    head()
+    content(id, stu_info)
+    
+
+
+def changescore(stu_info) :
+  id = input('Student ID: ')
+
+  if id not in stu_info.keys() :
+    print('NO SUCH PERSON.')
+
+  else :
+    exam_type = input('Mid/Final? ').lower()
+    
+
+    if exam_type == 'mid' :
+      mid_rev = input('Input new score : ')
+      
+      if 0 <= int(mid_rev) <= 100 :
+        # 전 값 출력
+        head()
+        content(id, stu_info)
+        stu_info[id][1] = mid_rev
+        print('Score changed.')
+        # 바뀐 값 출력
+        stu_info[id][3], stu_info[id][4] = score_preprocessing(stu_info[id][1], stu_info[id][2]) 
+        content(id, stu_info)
+        return stu_info
+        d
+        
+
+
+    elif exam_type == 'final' :
+      final_rev = input('Input new score : ')
+      # 0~100 외의 값이 입력된 경우 → 다시 changescore 처음부터
+      if 0 <= int(final_rev) <= 100 :
+        # 전 값 출력
+        head()
+        content(id, stu_info)
+        stu_info[id][2] = final_rev
+        print('Score changed.')
+        # 바뀐 값 출력
+        stu_info[id][3], stu_info[id][4] = score_preprocessing(stu_info[id][1], stu_info[id][2]) 
+        content(id, stu_info)
+        # 바뀐 값 return
+        return stu_info
+
+def add(stu_info) :
+  new_id = input('Student ID: ')
+
+  if new_id in stu_info.keys() :
+    print('ALREADY EXISTS.')
+
+  else :
+    new_name = input('Name: ')
+    new_midterm = input('Midterm Score: ')
+    new_final = input('Final Score: ')
+    print('Student added.')
+    new_average, new_grade = score_preprocessing(new_midterm, new_final)
+    stu_info[new_id] = [new_name, new_midterm, new_final, new_average, new_grade]
+
+  return stu_info
+
+def searchgrade(stu_info) :
+  grade = input('Grade to search: ').upper()
+  found = False
+
+  if grade in ('A', 'B', 'C', 'D', 'F') :
+    # 성적 해당 하는 학생들 출력
+    head()
+    for id in stu_info.keys() :
+      if stu_info[id][4] == grade :
+        content(id, stu_info)
+        found = True
+    
+    if not found :
+      print('NO RESULTS.')
+      
+  else :
+    pass
+
+        
+def remove(stu_info):
+  remove_id = input('Student ID: ')
+
+  if remove_id not in stu_info.keys() :
+    print('NO SUCH PERSON.')
+
+  else :
+    del stu_info[remove_id]
+    print('Student removed.')
+
+  return stu_info
+
+def quit(stu_info) :
+  save = input('Save data?[yes/no]').lower()
+  if save == 'yes' :
+    file_name = input('File name : ')
+    file_save = open(file_name, 'w')
+
+    for i in stu_info.keys() :
+      format = f'{i}\t{stu_info[i][0]}\t{stu_info[i][1]}\t{stu_info[i][2]}\t{stu_info[i][3]}\t{stu_info[i][4]}\n'
+      file_save.write(format)
+
+    file_save.close()
+    print('$')
+  f.close()
+  
+  elif save == 'no' :
+    print('$')
+    
+# 시작함수
+def start():
+    choose = input("# ").lower()
+
+    if choose == 'show':
+        show(stu_info)
+    elif choose == 'search':
+        search(stu_info)
+    elif choose == 'changescore':
+        changescore(stu_info)
+    elif choose == 'add':
+         add(stu_info)
+    elif choose == 'searchgrade':
+        searchgrade(stu_info)
+    elif choose == 'remove':
+        remove(stu_info)
+    elif choose == 'quit':
+        quit(stu_info)
+
+if __name__ == '__main__' :
+  while True :
+    start()
+
+
